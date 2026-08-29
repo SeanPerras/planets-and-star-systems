@@ -1,0 +1,365 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > StarSystemDao</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.example.daos</a>
+</div>
+
+<h1>Coverage Summary for Class: StarSystemDao (org.example.daos)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StarSystemDao</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.6%
+  </span>
+  <span class="absValue">
+    (12/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63%
+  </span>
+  <span class="absValue">
+    (29/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75.4%
+  </span>
+  <span class="absValue">
+    (89/118)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">StarSystemDao$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    70.6%
+  </span>
+  <span class="absValue">
+    (12/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    63%
+  </span>
+  <span class="absValue">
+    (29/46)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75.4%
+  </span>
+  <span class="absValue">
+    (89/118)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.example.daos;
+&nbsp;
+&nbsp;import org.example.exceptions.DaoException;
+&nbsp;import org.example.models.StarSystem;
+&nbsp;import org.springframework.dao.EmptyResultDataAccessException;
+&nbsp;import org.springframework.jdbc.core.JdbcTemplate;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;
+&nbsp;import javax.sql.DataSource;
+&nbsp;import java.sql.*;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Component
+&nbsp;public class StarSystemDao
+&nbsp;{
+&nbsp;    private final JdbcTemplate jdbcTemplate;
+&nbsp;
+<b class="fc">&nbsp;    public StarSystemDao(DataSource ds) { this.jdbcTemplate = new JdbcTemplate(ds); }</b>
+&nbsp;
+&nbsp;    public List&lt;StarSystem&gt; getAllStarSystems()
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems ORDER BY owner_username&quot;;</b>
+<b class="fc">&nbsp;        return jdbcTemplate.query(query, this::mapToStarSystem);</b>
+&nbsp;    }
+&nbsp;    public List&lt;StarSystem&gt; getAllStarSystems(String name, String starType, Integer planetCount)
+&nbsp;    {
+<b class="pc">&nbsp;        if ((name == null || name.isBlank()) &amp;&amp; starType == null &amp;&amp; planetCount == null)</b>
+<b class="nc">&nbsp;            return getAllStarSystems();</b>
+&nbsp;
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems ss WHERE &quot;;</b>
+<b class="fc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        boolean newQ = true;</b>
+<b class="fc">&nbsp;        if(name != null) {</b>
+<b class="fc">&nbsp;            query += &quot;name LIKE CONCAT(&#39;%&#39;, ?, &#39;%&#39;)&quot;;</b>
+<b class="fc">&nbsp;            params.add(name);</b>
+<b class="fc">&nbsp;            newQ = false;</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if(starType != null) {</b>
+<b class="fc">&nbsp;            query += &quot;star_type LIKE CONCAT(&#39;%&#39;, ?, &#39;%&#39;)&quot;;</b>
+<b class="fc">&nbsp;            params.add(starType);</b>
+<b class="fc">&nbsp;            newQ = false;</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if(planetCount != null) {</b>
+<b class="nc">&nbsp;            query += (newQ? &quot;&quot; : &quot;AND &quot;) +</b>
+&nbsp;                    &quot;(SELECT COUNT(*) FROM planets p WHERE p.system_id = ss.id) = ? &quot; +
+&nbsp;                    &quot;AND p.is_public = true&quot;;
+<b class="nc">&nbsp;            params.add(planetCount);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return jdbcTemplate.query(query, this::mapToStarSystem, params.toArray());</b>
+&nbsp;    }
+&nbsp;    public List&lt;StarSystem&gt; getAllStarSystems(String username)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems WHERE is_public = true&quot;;</b>
+<b class="fc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        if (username != null) {</b>
+<b class="fc">&nbsp;            query += &quot; OR owner_username = ?&quot;;</b>
+<b class="fc">&nbsp;            params.add(username);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return jdbcTemplate.query(query, this::mapToStarSystem, params.toArray());</b>
+&nbsp;    }
+&nbsp;    public List&lt;StarSystem&gt; getAllStarSystems(String name, String starType, Integer planetCount, String username)
+&nbsp;    {
+<b class="pc">&nbsp;        if ((name == null || name.isBlank()) &amp;&amp; starType == null &amp;&amp; planetCount == null)</b>
+<b class="fc">&nbsp;            return getAllStarSystems(username);</b>
+&nbsp;
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems ss WHERE (is_public = true&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        if (username != null) {</b>
+<b class="fc">&nbsp;            query += &quot; OR owner_username = ?&quot;;</b>
+<b class="fc">&nbsp;            params.add(username);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        query += &quot;)&quot;;</b>
+<b class="fc">&nbsp;        if(name != null) {</b>
+<b class="fc">&nbsp;            query += &quot; AND name LIKE CONCAT(&#39;%&#39;, ?, &#39;%&#39;)&quot;;</b>
+<b class="fc">&nbsp;            params.add(name);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if(starType != null) {</b>
+<b class="fc">&nbsp;            query += &quot; AND star_type LIKE CONCAT(&#39;%&#39;, ?, &#39;%&#39;)&quot;;</b>
+<b class="fc">&nbsp;            params.add(starType);</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if(planetCount != null) {</b>
+<b class="nc">&nbsp;            query +=&quot; AND (SELECT COUNT(*) FROM planets p WHERE p.system_id = ss.id = ?&quot; +</b>
+&nbsp;                    &quot; AND p.is_public = true)&quot;;
+<b class="nc">&nbsp;            params.add(planetCount);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        return jdbcTemplate.query(query, this::mapToStarSystem, params.toArray());</b>
+&nbsp;    }
+&nbsp;    public StarSystem getStarSystemByID(int ID)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;        try { return jdbcTemplate.queryForObject(query, this::mapToStarSystem, ID); }</b>
+<b class="fc">&nbsp;        catch (EmptyResultDataAccessException e) { return null; }</b>
+&nbsp;    }
+&nbsp;    public StarSystem getStarSystemByID(int ID, String username)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;SELECT * FROM star_systems WHERE id = ? AND (is_public = true&quot;;</b>
+<b class="fc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;        params.add(ID);</b>
+<b class="fc">&nbsp;        if (username != null) {</b>
+<b class="fc">&nbsp;            query += &quot; OR owner_username = ?&quot;;</b>
+<b class="fc">&nbsp;            params.add(username);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        query += &quot;)&quot;;</b>
+<b class="fc">&nbsp;        try { return jdbcTemplate.queryForObject(query, this::mapToStarSystem, params.toArray()); }</b>
+<b class="fc">&nbsp;        catch (EmptyResultDataAccessException e) { return null; }</b>
+&nbsp;    }
+&nbsp;    public List&lt;StarSystem.Designator&gt; getAllDesignators()
+&nbsp;    {
+<b class="nc">&nbsp;        String query = &quot;SELECT id, name FROM star_systems&quot;;</b>
+<b class="nc">&nbsp;        return jdbcTemplate.query(query, this::mapToDesignator);</b>
+&nbsp;    }
+&nbsp;    public List&lt;StarSystem.Designator&gt; getAllDesignators(String username)
+&nbsp;    {
+<b class="nc">&nbsp;        String query = &quot;SELECT id, name FROM star_systems WHERE is_public = true&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        if (username != null) {</b>
+<b class="nc">&nbsp;            query += &quot; OR owner_username = ?&quot;;</b>
+<b class="nc">&nbsp;            params.add(username);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return jdbcTemplate.query(query, this::mapToDesignator, params.toArray());</b>
+&nbsp;    }
+&nbsp;    public StarSystem.Designator getDesignatorByID(int ID)
+&nbsp;    {
+<b class="nc">&nbsp;        String query = &quot;SELECT id, name FROM star_systems WHERE id = ?&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try { return jdbcTemplate.queryForObject(query, this::mapToDesignator, ID); }</b>
+<b class="nc">&nbsp;        catch (EmptyResultDataAccessException e) { return null; }</b>
+&nbsp;    }
+&nbsp;    public StarSystem.Designator getDesignatorByID(int ID, String username)
+&nbsp;    {
+<b class="nc">&nbsp;        String query = &quot;SELECT id, name FROM star_systems WHERE id = ? AND (is_public = ?&quot;;</b>
+<b class="nc">&nbsp;        List&lt;Object&gt; params = new ArrayList&lt;&gt;();</b>
+<b class="nc">&nbsp;        params.add(ID);</b>
+<b class="nc">&nbsp;        if (username != null) {</b>
+<b class="nc">&nbsp;            query += &quot; OR owner_username = ?&quot;;</b>
+<b class="nc">&nbsp;            params.add(username);</b>
+&nbsp;        }
+<b class="nc">&nbsp;        query += &quot;)&quot;;</b>
+&nbsp;
+<b class="nc">&nbsp;        try { return jdbcTemplate.queryForObject(query, this::mapToDesignator, params.toArray()); }</b>
+<b class="nc">&nbsp;        catch (EmptyResultDataAccessException e) { return null; }</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public StarSystem createStarSystem(StarSystem s, String username)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;&quot;&quot;</b>
+&nbsp;                INSERT INTO star_systems (name, star_type, star_mass, distance_from_Earth, description, is_public, owner_username)
+&nbsp;                VALUES (?, ?, ?, ?, ?, ?, ?)
+&nbsp;                &quot;&quot;&quot;;
+<b class="fc">&nbsp;        try (Connection conn = jdbcTemplate.getDataSource().getConnection();</b>
+<b class="fc">&nbsp;             PreparedStatement ps = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {</b>
+<b class="fc">&nbsp;            ps.setString(1, s.getName());</b>
+<b class="fc">&nbsp;            ps.setString(2, s.getStarType());</b>
+<b class="fc">&nbsp;            ps.setBigDecimal(3, s.getStarMass());</b>
+<b class="fc">&nbsp;            ps.setBigDecimal(4, s.getDistanceFromEarth());</b>
+<b class="fc">&nbsp;            ps.setString(5, s.getDescription());</b>
+<b class="fc">&nbsp;            ps.setBoolean(6, s.isPublicSystem());</b>
+<b class="fc">&nbsp;            ps.setString(7, username);</b>
+<b class="fc">&nbsp;            ps.executeUpdate();</b>
+<b class="fc">&nbsp;            try (ResultSet rs = ps.getGeneratedKeys()) {</b>
+<b class="pc">&nbsp;                if(rs.next()) s.setID(rs.getInt(1));</b>
+<b class="nc">&nbsp;                else throw new DaoException(&quot;Failed to generate star system ID&quot;);</b>
+&nbsp;            }
+<b class="fc">&nbsp;        } catch (SQLException sqle) { throw new DaoException(&quot;Failed to form star system&quot;); }</b>
+<b class="fc">&nbsp;        return getStarSystemByID(s.getID());</b>
+&nbsp;    }
+&nbsp;    public StarSystem updateStarSystemAdmin(StarSystem s)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;&quot;&quot;</b>
+&nbsp;                UPDATE star_systems
+&nbsp;                SET name = ?, star_type = ?, star_mass = ?, distance_from_Earth = ?,
+&nbsp;                    description = ?, owner_username = ?, is_public = ?
+&nbsp;                WHERE id = ?
+&nbsp;                &quot;&quot;&quot;;
+<b class="fc">&nbsp;        int rows = jdbcTemplate.update(query, s.getName(), s.getStarType(), s.getStarMass(),</b>
+<b class="fc">&nbsp;                s.getDistanceFromEarth(), s.getDescription(), s.getOwnerUsername(), s.isPublicSystem(), s.getID());</b>
+<b class="pc">&nbsp;        if (rows == 0) return null;</b>
+<b class="fc">&nbsp;        return getStarSystemByID(s.getID());</b>
+&nbsp;    }
+&nbsp;    public StarSystem updateStarSystem(StarSystem s)
+&nbsp;    {
+<b class="fc">&nbsp;        String query = &quot;&quot;&quot;</b>
+&nbsp;                UPDATE star_systems
+&nbsp;                SET name = ?, star_type = ?, star_mass = ?, distance_from_Earth = ?,
+&nbsp;                    description = ?, is_public = ?
+&nbsp;                WHERE id = ?
+&nbsp;                &quot;&quot;&quot;;
+<b class="fc">&nbsp;        int rows = jdbcTemplate.update(query, s.getName(), s.getStarType(), s.getStarMass(),</b>
+<b class="fc">&nbsp;                s.getDistanceFromEarth(), s.getDescription(), s.isPublicSystem(), s.getID());</b>
+<b class="pc">&nbsp;        if (rows == 0) return null;</b>
+<b class="fc">&nbsp;        return getStarSystemByID(s.getID());</b>
+&nbsp;    }
+&nbsp;    @Transactional
+&nbsp;    public int destroyStarSystem(int ID)
+&nbsp;    {
+<b class="fc">&nbsp;        String roguePlanets = &quot;UPDATE planets SET distance_from_star = NULL WHERE system_id = ?&quot;;</b>
+<b class="fc">&nbsp;        jdbcTemplate.update(roguePlanets, ID);</b>
+&nbsp;
+<b class="fc">&nbsp;        String query = &quot;DELETE FROM star_systems WHERE id = ?&quot;;</b>
+<b class="fc">&nbsp;        return jdbcTemplate.update(query, ID);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private StarSystem mapToStarSystem(ResultSet rs, int row) throws SQLException
+&nbsp;    {
+<b class="fc">&nbsp;        return new StarSystem(</b>
+<b class="fc">&nbsp;                rs.getInt(&quot;id&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;name&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;star_type&quot;),</b>
+<b class="fc">&nbsp;                rs.getBigDecimal(&quot;star_mass&quot;),</b>
+<b class="fc">&nbsp;                rs.getBigDecimal(&quot;distance_from_Earth&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;description&quot;),</b>
+<b class="fc">&nbsp;                rs.getBoolean(&quot;is_public&quot;),</b>
+<b class="fc">&nbsp;                rs.getString(&quot;owner_username&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;    private StarSystem.Designator mapToDesignator(ResultSet rs, int row) throws SQLException
+&nbsp;    {
+<b class="nc">&nbsp;        return new StarSystem.Designator(</b>
+<b class="nc">&nbsp;                rs.getInt(&quot;id&quot;),</b>
+<b class="nc">&nbsp;                rs.getString(&quot;name&quot;)</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-08-26 22:28</div>
+</div>
+</body>
+</html>

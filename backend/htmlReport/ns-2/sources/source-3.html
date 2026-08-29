@@ -1,0 +1,302 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > StarSystemController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.example.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: StarSystemController (org.example.controllers)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StarSystemController</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67.1%
+  </span>
+  <span class="absValue">
+    (51/76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.1%
+  </span>
+  <span class="absValue">
+    (50/64)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">StarSystemController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67.1%
+  </span>
+  <span class="absValue">
+    (51/76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.1%
+  </span>
+  <span class="absValue">
+    (50/64)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.example.controllers;
+&nbsp;
+&nbsp;import org.example.daos.StarSystemDao;
+&nbsp;import org.example.daos.UserDao;
+&nbsp;import org.example.models.StarSystem;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.security.access.AccessDeniedException;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.security.Principal;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@CrossOrigin
+&nbsp;@RequestMapping(&quot;/api/star-systems&quot;)
+&nbsp;@PreAuthorize(&quot;isAuthenticated()&quot;)
+<b class="fc">&nbsp;public class StarSystemController</b>
+&nbsp;{
+&nbsp;    @Autowired
+&nbsp;    private StarSystemDao starSystemDao;
+&nbsp;    @Autowired
+&nbsp;    private UserDao userDao;
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public List&lt;StarSystem&gt; getAll(@RequestParam(required = false) String name,
+&nbsp;                                   @RequestParam(required = false) String starType,
+&nbsp;                                   @RequestParam(required = false) Integer planetCount,
+&nbsp;                                   Principal p)
+&nbsp;    {
+<b class="pc">&nbsp;        if (planetCount != null &amp;&amp; planetCount &lt; 0)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;Planet count cannot be negative.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        String username = p == null ? null : p.getName();</b>
+<b class="pc">&nbsp;        if(name == null &amp;&amp; starType == null &amp;&amp; planetCount == null &amp;&amp; p != null) {</b>
+<b class="fc">&nbsp;            if (isAdmin(p)) return starSystemDao.getAllStarSystems();</b>
+<b class="fc">&nbsp;            return starSystemDao.getAllStarSystems(username);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if(isAdmin(p)) return starSystemDao.getAllStarSystems(name, starType, planetCount);</b>
+<b class="fc">&nbsp;        return starSystemDao.getAllStarSystems(name, starType, planetCount, username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/designators&quot;)
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public List&lt;StarSystem.Designator&gt; getAllDesignators(Principal p)
+&nbsp;    {
+<b class="nc">&nbsp;        String username = p == null ? null : p.getName();</b>
+<b class="nc">&nbsp;        if (isAdmin(p)) return starSystemDao.getAllDesignators();</b>
+<b class="nc">&nbsp;        return starSystemDao.getAllDesignators(username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{ID}&quot;)
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public StarSystem get(@PathVariable int ID, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        String username = p == null ? null : p.getName();</b>
+&nbsp;
+&nbsp;        StarSystem starSystem;
+<b class="fc">&nbsp;        if (isAdmin(p)) starSystem = starSystemDao.getStarSystemByID(ID);</b>
+<b class="fc">&nbsp;        else starSystem = starSystemDao.getStarSystemByID(ID, username);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (starSystem == null) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return starSystem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/designators/{ID}&quot;)
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public StarSystem.Designator getDesignator(@PathVariable int ID, Principal p)
+&nbsp;    {
+<b class="nc">&nbsp;        String username = p == null ? null : p.getName();</b>
+&nbsp;
+&nbsp;        StarSystem.Designator designator;
+<b class="nc">&nbsp;        if(isAdmin(p)) designator = starSystemDao.getDesignatorByID(ID);</b>
+<b class="nc">&nbsp;        else designator = starSystemDao.getDesignatorByID(ID, username);</b>
+&nbsp;
+<b class="nc">&nbsp;        if(designator == null) NOT_FOUND(ID);</b>
+<b class="nc">&nbsp;        return designator;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    @ResponseStatus(HttpStatus.CREATED)
+&nbsp;    public StarSystem create(@RequestBody StarSystem starSystem, Principal p)
+&nbsp;    {
+<b class="pc">&nbsp;        if (p == null)</b>
+<b class="nc">&nbsp;            throw new ResponseStatusException(</b>
+&nbsp;                    HttpStatus.UNAUTHORIZED,
+&nbsp;                    &quot;You must be logged in to create a star system.&quot;);
+<b class="pc">&nbsp;        if (starSystem.getStarMass() == null ||</b>
+<b class="fc">&nbsp;                starSystem.getStarMass().compareTo(BigDecimal.ZERO) &lt;= 0)</b>
+<b class="fc">&nbsp;            BAD_REQUEST(&quot;Star mass must be positive.&quot;);</b>
+<b class="pc">&nbsp;        if (starSystem.getDistanceFromEarth() == null ||</b>
+<b class="pc">&nbsp;                starSystem.getDistanceFromEarth().compareTo(BigDecimal.ONE) &lt; 0)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;Distance from Earth must be, at least, 1 Ly.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        return starSystemDao.createStarSystem(starSystem, p.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{ID}&quot;)
+&nbsp;    public StarSystem update(@PathVariable int ID, @RequestBody StarSystem starSystem, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        boolean admin = isAdmin(p);</b>
+&nbsp;        StarSystem dbStarSystem;
+<b class="fc">&nbsp;        if(admin) {</b>
+<b class="fc">&nbsp;            dbStarSystem = starSystemDao.getStarSystemByID(ID);</b>
+<b class="fc">&nbsp;            if(dbStarSystem == null) NOT_FOUND(ID);</b>
+&nbsp;        }
+&nbsp;        else {
+<b class="fc">&nbsp;            dbStarSystem = starSystemDao.getStarSystemByID(ID, p.getName());</b>
+<b class="fc">&nbsp;            if(dbStarSystem == null) NOT_FOUND(ID);</b>
+&nbsp;
+<b class="pc">&nbsp;            if(!dbStarSystem.getOwnerUsername().equals(p.getName()))</b>
+<b class="nc">&nbsp;                throw new AccessDeniedException(&quot;You don&#39;t have access to this star system.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            starSystem.setOwnerUsername(dbStarSystem.getOwnerUsername());</b>
+&nbsp;        }
+<b class="pc">&nbsp;        if (starSystem.getStarMass() == null ||</b>
+<b class="fc">&nbsp;                starSystem.getStarMass().compareTo(BigDecimal.ZERO) &lt;= 0)</b>
+<b class="fc">&nbsp;            BAD_REQUEST(&quot;Star mass must be positive.&quot;);</b>
+<b class="pc">&nbsp;        if (starSystem.getDistanceFromEarth() == null ||</b>
+<b class="pc">&nbsp;                starSystem.getDistanceFromEarth().compareTo(BigDecimal.ONE) &lt; 0)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;Distance from Earth must be, at least, 1 Ly.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        starSystem.setID(ID);</b>
+<b class="fc">&nbsp;        StarSystem updatedStarSystem = admin? starSystemDao.updateStarSystemAdmin(starSystem) :</b>
+<b class="fc">&nbsp;                starSystemDao.updateStarSystem(starSystem);</b>
+&nbsp;
+<b class="pc">&nbsp;        if (updatedStarSystem == null) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return updatedStarSystem;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/{ID}&quot;)
+&nbsp;    public int delete(@PathVariable int ID, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        boolean admin = isAdmin(p);</b>
+&nbsp;        StarSystem starSystem;
+<b class="fc">&nbsp;        if(admin) starSystem = starSystemDao.getStarSystemByID(ID);</b>
+<b class="fc">&nbsp;        else starSystem = starSystemDao.getStarSystemByID(ID, p.getName());</b>
+&nbsp;
+<b class="fc">&nbsp;        if(starSystem == null) NOT_FOUND(ID);</b>
+<b class="pc">&nbsp;        else if(!admin &amp;&amp; !starSystem.getOwnerUsername().equals(p.getName()))</b>
+<b class="nc">&nbsp;            throw new AccessDeniedException(&quot;You don&#39;t have access to this star system.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        int rows = starSystemDao.destroyStarSystem(ID);</b>
+<b class="pc">&nbsp;        if (rows == 0) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return rows;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    private void NOT_FOUND(int ID)
+&nbsp;    {
+<b class="fc">&nbsp;        throw new ResponseStatusException(</b>
+&nbsp;                HttpStatus.NOT_FOUND,
+<b class="fc">&nbsp;                &quot;Star system with ID: %s wasn&#39;t found&quot;.formatted(ID));</b>
+&nbsp;    }
+&nbsp;    private void BAD_REQUEST(String message)
+&nbsp;    {
+<b class="fc">&nbsp;        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);</b>
+&nbsp;    }
+&nbsp;    private boolean isAdmin(Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        return p != null &amp;&amp; userDao.getRoles(p.getName()).contains(&quot;ADMIN&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-08-26 22:28</div>
+</div>
+</body>
+</html>

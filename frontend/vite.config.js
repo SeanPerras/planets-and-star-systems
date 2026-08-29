@@ -25,8 +25,12 @@ export default defineConfig({
               req.url
             );
           });
-        },
+        }
       },
-    },
-  },
+      "/auth": {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  }
 });

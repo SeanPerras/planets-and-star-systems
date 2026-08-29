@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PlanetController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.example.controllers</a>
+</div>
+
+<h1>Coverage Summary for Class: PlanetController (org.example.controllers)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PlanetController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (54/66)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.5%
+  </span>
+  <span class="absValue">
+    (46/52)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PlanetController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (54/66)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.5%
+  </span>
+  <span class="absValue">
+    (46/52)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.example.controllers;
+&nbsp;
+&nbsp;import org.example.daos.PlanetDao;
+&nbsp;import org.example.daos.UserDao;
+&nbsp;import org.example.models.Planet;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.security.access.AccessDeniedException;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import java.security.Principal;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@CrossOrigin
+&nbsp;@RequestMapping(&quot;/api/planets&quot;)
+&nbsp;@PreAuthorize(&quot;isAuthenticated()&quot;)
+<b class="fc">&nbsp;public class PlanetController</b>
+&nbsp;{
+&nbsp;    @Autowired
+&nbsp;    private PlanetDao planetDao;
+&nbsp;    @Autowired
+&nbsp;    private UserDao userDao;
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public List&lt;Planet&gt; getAll(@RequestParam(required = false) Integer systemID,
+&nbsp;                               @RequestParam(required = false) String name,
+&nbsp;                               @RequestParam(required = false) Boolean rogue,
+&nbsp;                               Principal p)
+&nbsp;    {
+<b class="pc">&nbsp;        if (systemID != null &amp;&amp; rogue != null)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;A system ID and rogue status cannot be searched together.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        String username = p == null ? null : p.getName();</b>
+<b class="fc">&nbsp;        if(systemID == null &amp;&amp; name == null &amp;&amp; rogue == null &amp;&amp; p != null) {</b>
+<b class="fc">&nbsp;            if (isAdmin(p)) return planetDao.getAllPlanets();</b>
+<b class="fc">&nbsp;            return planetDao.getAllPlanets(username);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if(isAdmin(p)) return planetDao.getAllPlanets(systemID, name, rogue);</b>
+<b class="fc">&nbsp;        return planetDao.getAllPlanets(systemID, name, rogue, username);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{ID}&quot;)
+&nbsp;    @PreAuthorize(&quot;permitAll()&quot;)
+&nbsp;    public Planet get(@PathVariable int ID, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        String username = p == null ? null : p.getName();</b>
+&nbsp;        Planet planet;
+<b class="fc">&nbsp;        if(isAdmin(p)) planet = planetDao.getPlanetByID(ID);</b>
+<b class="fc">&nbsp;        else planet = planetDao.getPlanetByID(ID, username);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (planet == null) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return planet;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    @ResponseStatus(HttpStatus.CREATED)
+&nbsp;    public Planet create(@RequestBody Planet planet, Principal p)
+&nbsp;    {
+<b class="pc">&nbsp;        if (p == null) {</b>
+<b class="nc">&nbsp;            throw new ResponseStatusException(</b>
+&nbsp;                HttpStatus.UNAUTHORIZED,
+&nbsp;                &quot;You must be logged in to create a planet.&quot;);
+&nbsp;        }
+<b class="fc">&nbsp;        if (planet.getSystemID() == null &amp;&amp; planet.getDistanceFromStar() != null)</b>
+<b class="fc">&nbsp;            BAD_REQUEST(&quot;A rogue planet cannot have a distance from a star.&quot;);</b>
+<b class="pc">&nbsp;        else if (planet.getSystemID() != null &amp;&amp; planet.getDistanceFromStar() == null)</b>
+<b class="fc">&nbsp;            BAD_REQUEST(&quot;A planet in a system must have a distance from its star.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        return planetDao.createPlanet(planet, p.getName());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{ID}&quot;)
+&nbsp;    public Planet update(@PathVariable int ID, @RequestBody Planet planet, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        boolean admin = isAdmin(p);</b>
+&nbsp;        Planet dbPlanet;
+&nbsp;
+<b class="fc">&nbsp;        if(admin) {</b>
+<b class="fc">&nbsp;            dbPlanet = planetDao.getPlanetByID(ID);</b>
+<b class="fc">&nbsp;            if(dbPlanet == null) NOT_FOUND(ID);</b>
+&nbsp;        }
+&nbsp;        else {
+<b class="fc">&nbsp;            dbPlanet = planetDao.getPlanetByID(ID, p.getName());</b>
+<b class="fc">&nbsp;            if(dbPlanet == null) NOT_FOUND(ID);</b>
+&nbsp;
+<b class="pc">&nbsp;            if(!dbPlanet.getOwnerUsername().equals(p.getName()))</b>
+<b class="nc">&nbsp;                throw new AccessDeniedException(&quot;You don&#39;t have access to this planet.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            planet.setOwnerUsername(dbPlanet.getOwnerUsername());</b>
+&nbsp;        }
+&nbsp;
+<b class="pc">&nbsp;        if (planet.getSystemID() == null &amp;&amp; planet.getDistanceFromStar() != null)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;A rogue planet cannot have a distance from a star.&quot;);</b>
+<b class="pc">&nbsp;        else if (planet.getSystemID() != null &amp;&amp; planet.getDistanceFromStar() == null)</b>
+<b class="nc">&nbsp;            BAD_REQUEST(&quot;A planet in a system must have a distance from its star.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        planet.setID(ID);</b>
+<b class="fc">&nbsp;        Planet updatedPlanet = admin? planetDao.updatePlanetAdmin(planet) :</b>
+<b class="fc">&nbsp;                planetDao.updatePlanet(planet);</b>
+&nbsp;
+<b class="pc">&nbsp;        if (updatedPlanet == null) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return updatedPlanet;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/{ID}&quot;)
+&nbsp;    public int delete(@PathVariable int ID, Principal p)
+&nbsp;    {
+<b class="fc">&nbsp;        boolean admin = isAdmin(p);</b>
+&nbsp;        Planet planet;
+<b class="fc">&nbsp;        if(admin) planet = planetDao.getPlanetByID(ID);</b>
+<b class="fc">&nbsp;        else planet = planetDao.getPlanetByID(ID, p.getName());</b>
+&nbsp;
+<b class="fc">&nbsp;        if(planet == null) NOT_FOUND(ID);</b>
+<b class="pc">&nbsp;        if(!admin &amp;&amp; !planet.getOwnerUsername().equals(p.getName()))</b>
+<b class="nc">&nbsp;            throw new AccessDeniedException(&quot;You don&#39;t have access to this planet.&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        int rows = planetDao.destroyPlanet(ID);</b>
+<b class="pc">&nbsp;        if (rows == 0) NOT_FOUND(ID);</b>
+<b class="fc">&nbsp;        return rows;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    private void NOT_FOUND(int ID)
+&nbsp;    {
+<b class="fc">&nbsp;        throw new ResponseStatusException(</b>
+&nbsp;                HttpStatus.NOT_FOUND,
+<b class="fc">&nbsp;                &quot;Planet with ID: %s wasn&#39;t found&quot;.formatted(ID));</b>
+&nbsp;    }
+&nbsp;    private void BAD_REQUEST(String message)
+&nbsp;    {
+<b class="fc">&nbsp;        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);</b>
+&nbsp;    }
+&nbsp;    private boolean isAdmin(Principal p) {
+<b class="fc">&nbsp;        return p != null &amp;&amp; userDao.getRoles(p.getName()).contains(&quot;ADMIN&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-08-26 22:28</div>
+</div>
+</body>
+</html>

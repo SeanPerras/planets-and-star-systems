@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\backend",
+    "\\backend\\src",
+    "\\backend\\src\\main",
+    "\\backend\\src\\main\\java",
+    "\\backend\\src\\main\\java\\org",
+    "\\backend\\src\\main\\java\\org\\example",
+    "\\database",
+    "\\frontend",
+    "\\frontend\\src"
+  ],
+  "SelectedNode": "\\backend\\src\\main\\java\\org\\example\\SpringBootApplication.java",
+  "PreviewInSolutionExplorer": false
+}

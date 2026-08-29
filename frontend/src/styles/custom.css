@@ -1,0 +1,49 @@
+.bg-stars {
+    background-color: black;
+    background-image:
+        radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 2px),
+        radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 3px),
+        radial-gradient(white, rgba(255, 255, 255, .3) 2px, transparent 3px),
+        radial-gradient(white, rgba(255, 255, 255, .5) 1px, transparent 5px),
+        radial-gradient(white, rgba(255, 255, 255, .5) 2px, transparent 3px),
+        radial-gradient(white, rgba(255, 255, 255, 1) 2px, transparent 3px),
+        radial-gradient(circle at 12% 18%, rgba(255, 255, 255, .90) 0 0.7px, transparent 0.9px),
+        radial-gradient(circle at 73% 31%, rgba(190, 220, 255, .65) 0 1px, transparent 1.4px),
+        radial-gradient(circle at 39% 76%, rgba(255, 245, 210, .75) 0 0.6px, transparent 1px),
+        radial-gradient(circle at 91% 68%, rgba(255, 255, 255, .45) 0 1.2px, transparent 1.7px),
+        radial-gradient(circle at 22% 57%, rgba(255, 255, 255, .50) 0 0.5px, transparent 0.9px),
+        radial-gradient(circle at 64% 12%, rgba(180, 210, 255, .45) 0 0.8px, transparent 1.2px),
+        radial-gradient(circle at 84% 88%, rgba(255, 255, 255, .40) 0 0.6px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, .90) 0 0.7px, transparent 1px),
+        radial-gradient(circle, rgba(190, 220, 255, .55) 0 1px, transparent 1.4px),
+        radial-gradient(circle, rgba(255, 245, 210, .70) 0 0.6px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, .40) 0 1.2px, transparent 1.7px),
+        radial-gradient(circle, rgba(255, 255, 255, .55) 0 0.5px, transparent .9px),
+        radial-gradient(circle, rgba(180, 210, 255, .45) 0 0.8px, transparent 1.2px),
+        radial-gradient(circle, rgba(255, 255, 255, .35) 0 0.6px, transparent 1px),
+        radial-gradient(circle, rgba(255, 255, 255, .25) 0 0.5px, transparent .8px);
+    background-size:
+        100px 100px,
+        215px 215px,
+        250px 250px,
+        370px 330px,
+        205px 255px,
+        295px 295px,
+
+        233px 179px,
+        311px 257px,
+        197px 293px,
+        419px 223px,
+        271px 347px,
+        373px 199px,
+        241px 401px,
+
+        233px 179px,
+        311px 257px,
+        197px 293px,
+        419px 223px,
+        271px 347px,
+        373px 199px,
+        241px 401px,
+        457px 307px;
+}
